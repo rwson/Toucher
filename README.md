@@ -55,5 +55,8 @@ swipeRight | 右滑 |  Fucntion
 swipeDown | 下滑 |  Fucntion
 swipeLeft | 左滑 |  Fucntion
 
-参考腾讯AlloyTeam手势库[AlloyFinger](https://github.com/AlloyTeam/AlloyFinger)
+##### TODO
+- pinch缩放事件
+- rotate旋转事件
 
+参考腾讯AlloyTeam手势库[AlloyFinger](https://github.com/AlloyTeam/AlloyFinger)
