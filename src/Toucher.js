@@ -147,6 +147,8 @@
         //  初始化方法
         init: function(selector) {
             this.el = document.querySelector(selector) || document.body;
+            this.scale = 1;
+            this.pinchStartLen = null;
             this.isDoubleTap = false;
             this.triggedSwipeStart = false;
             this.triggedLongTap = false;
@@ -177,6 +179,8 @@
             this.swipeRight = function() {};
             this.swipeDown = function() {};
             this.swipeLeft = function() {};
+            this.pinch = function() {};
+            this.rotate = function() {};
 
             //  绑定4个事件
             bindEv(this.el, "touchstart", this._start.bind(this));
@@ -212,6 +216,7 @@
             }
 
             var self = this;
+            var otherToucher, v, preV = this.preV;
 
             self.now = getTimeStr();
             self.startPos = getPosInfo(ev);
@@ -239,6 +244,14 @@
             //  多个手指放到屏幕
             if (ev.touches.length > 1) {
                 self._cancelLongTap();
+                otherToucher = ev.touches[1];
+                v = {
+                    x: otherToucher.pageX - self.startPos.pageX,
+                    y: otherToucher.pageY - self.startPos.pageY
+                };
+                this.preV = v;
+                self.pinchStartLen = getLength(v);
+                self.isDoubleTap = false;
             }
 
             self.last = self.now;
@@ -253,15 +266,17 @@
                 return;
             }
 
-            var v;
+            var v, otherToucher;
             var self = this;
             var len = ev.touches.length;
             var posNow = getPosInfo(ev);
+            var preV = self.preV;
             var currentX = posNow.pageX;
             var currentY = posNow.pageY;
 
-            //  手指移动取消长按事件
+            //  手指移动取消长按事件和双击
             self._cancelLongTap();
+            self.isDoubleTap = false;
 
             //  一次按下抬起只触发一次swipeStart
             if (!self.triggedSwipeStart) {
@@ -283,8 +298,36 @@
                 self.swipe(_wrapped);
             }
 
-            //  缩放,旋转
             if (len > 1) {
+                otherToucher = ev.touches[1];
+                v = {
+                    x: otherToucher.pageX - currentX,
+                    y: otherToucher.pageY - currentY
+                };
+
+                //  缩放
+                _wrapped = wrapEvent(ev, {
+                    el: self.el,
+                    type: "pinch",
+                    scale: getLength(v) / this.pinchStartLen,
+                    timeStr: getTimeStr(),
+                    position: posNow
+                });
+                self.pinch(_wrapped);
+
+                //  旋转
+                _wrapped = wrapEvent(ev, {
+                    el: self.el,
+                    type: "rotate",
+                    angle: getRotateAngle(v, preV),
+                    timeStr: getTimeStr(),
+                    position: posNow
+                });
+
+                console.log(_wrapped);
+
+                self.rotate(_wrapped);
+
                 ev.preventDefault();
             }
 
@@ -334,7 +377,7 @@
                         callback(_wrapped);
                     }
                 }, 0);
-            } else if(!self.triggedLongTap) {
+            } else if (!self.triggedLongTap) {
                 self.tapTimeout = setTimeout(function() {
                     if (self.isDoubleTap) {
                         _wrapped = wrapEvent(ev, {

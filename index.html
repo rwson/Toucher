@@ -10,17 +10,7 @@
             margin: 0;
             padding: 0;
         }
-        #toucher {
-            width: 100%;
-            height: 300px;
-            background: yellow;
-        }
-        
-        #result {
-            margin-top: 20px;
-            font-size: 14px;
-            text-align: center;
-        }
+
     </style>
 </head>
 
@@ -28,6 +18,9 @@
     <div id="toucher">
     </div>
     <div id="result"></div>
+
+    <div></div>
+
     <script src="src/Toucher.js"></script>
     <script>
     window.onload = function() {
@@ -64,6 +57,12 @@
             })
             .on("swipeLeft", function(e) {
                 result.innerHTML = e.type;
+            })
+            .on("rotate", function(e) {
+                result.innerHTML = e.type + " angle " + e.angle;
+            })
+            .on("pinch", function(e) {
+                result.innerHTML = e.type + " scale " + e.scale;
             });
     }
     </script>
