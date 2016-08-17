@@ -162,13 +162,13 @@
             this.preTapPosition = {};
 
             this.cfg = {
-                doubleTapTime: 500,
+                doubleTapTime: 400,
                 longTapTime: 700
             };
 
             //  支持的事件列表
             this.singleTap = function() {};
-            this.doubleTap = function() {};
+            this.doubleTapTime = function() {};
             this.longTap = function() {};
             this.swipe = function() {};
             this.swipeStart = function() {};

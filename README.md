@@ -2,6 +2,8 @@
 
 移动端手势库
 
+![demos](img/Toucher.gif)
+
 #### API
         
     Toucher("#node").config(Object).on(Object)
@@ -10,7 +12,7 @@
         
     var toucher = Toucher("#node");
     toucher.config(Object);
-    toucher.on(Object);
+    toucher.on(name, callback);
     
 通过
 
@@ -36,21 +38,22 @@
 属性 | 含义  |  类型
 ---|---|---
 longTapTime | 触发longTap事件的时间(毫秒),默认700ms |  Number
-doubleTapTime | 在多少毫秒内连续点击两次屏幕,触发doubleTap,默认300ms  | Number
+doubleTapTime | 在多少毫秒内连续点击两次屏幕,触发doubleTap,默认400ms  | Number
 
 - on
 
 属性 | 含义  |  类型
 ---|---|---
-tap | 轻击(单个手指) |  Fucntion
-touchStart | 手指放到屏幕(单个手指) |  Fucntion
-mutilTouchStart | 手指(多个)放到屏幕 |  Fucntion
+singleTap | 轻击(单个手指) |  Fucntion
+doubleTap | 手指放到屏幕(单个手指) |  Fucntion
 longTap | 长按 |  Fucntion
-touchMove | 手指在屏幕上移动 |  Fucntion
-touchUp | 上滑 |  Fucntion
-touchDown | 下滑 |  Fucntion
-touchLeft | 左滑 |  Fucntion
-touchRight | 右滑 |  Fucntion
+swipe | 手指在屏幕上移动 |  Fucntion
+swipeStart | 手指在屏幕上移动(只触发一次) |  Fucntion
+swipeEnd | 下滑 |  Fucntion
+swipeUp | 左滑 |  Fucntion
+swipeRight | 右滑 |  Fucntion
+swipeDown | 下滑 |  Fucntion
+swipeLeft | 左滑 |  Fucntion
 
 参考腾讯AlloyTeam手势库[AlloyFinger](https://github.com/AlloyTeam/AlloyFinger)
 
