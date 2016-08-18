@@ -59,6 +59,6 @@ rotate | 旋转 |  Fucntion
 
 扫描下方二维码或者手机直接访问https://rwson.github.io/Toucher/
 
-![QR Code](img/demo.png)
+<img src="img/demo.png" width="50%" height="50%" />
 
 - 参考腾讯AlloyTeam手势库[AlloyFinger](https://github.com/AlloyTeam/AlloyFinger)实现
