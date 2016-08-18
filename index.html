@@ -136,8 +136,598 @@
     <div class="rotate-container" id="rotate-container">
         <img src="https://raw.githubusercontent.com/rwson/Toucher/master/img/1.jpg" class="pinch-img-item" id="rotate-img-item" />
     </div>
-    <script type="text/javascript" src="https://raw.githubusercontent.com/rwson/Toucher/master/src/Toucher.js"></script>
-    <script type="text/javascript" src="https://raw.githubusercontent.com/rwson/Toucher/master/js/demo.js"></script>
+    <script type="text/javascript">
+        
+        /**
+ * Toucher
+ * build by rwson @8/15/16
+ * mail:rw_Song@sina.com
+ */
+
+    "use strict";
+    
+    (function(root, factory) {
+        if (typeof define === "function" && define.amd) {
+            define([], function() {
+                return factory(root);
+            });
+        } else {
+            root.Toucher = factory(root);
+        }
+    }(window, function(root, undefined) {
+    
+        if (!"ontouchstart" in window) {
+            return;
+        }
+    
+        var _wrapped;
+    
+        //  获取对象上的类名
+        function typeOf(obj) {
+            return Object.prototype.toString.call(obj).toLowerCase().slice(8, -1);
+        }
+    
+        //  获取当前时间戳
+        function getTimeStr() {
+            return +(new Date());
+        }
+    
+        //  获取位置信息
+        function getPosInfo(ev) {
+            var _touches = ev.touches;
+            if (!_touches || _touches.length === 0) {
+                return;
+            }
+            return {
+                pageX: ev.touches[0].pageX,
+                pageY: ev.touches[0].pageY,
+                clientX: ev.touches[0].clientX || 0,
+                clientY: ev.touches[0].clientY || 0
+            };
+        }
+    
+        //  绑定事件
+        function bindEv(el, type, fn) {
+            if (el.addEventListener) {
+                el.addEventListener(type, fn, false);
+            } else {
+                el["on" + type] = fn;
+            }
+        }
+    
+        //  解绑事件
+        function unBindEv(el, type, fn) {
+            if (el.removeEventListener) {
+                el.removeEventListener(type, fn, false);
+            } else {
+                el["on" + type] = fn;
+            }
+        }
+    
+        //  获得滑动方向
+        function getDirection(startX, startY, endX, endY) {
+            var xRes = startX - endX;
+            var xResAbs = Math.abs(startX - endX);
+            var yRes = startY - endY;
+            var yResAbs = Math.abs(startY - endY);
+            var direction = "";
+    
+            if (xResAbs >= yResAbs && xResAbs > 25) {
+                direction = (xRes > 0) ? "Right" : "Left";
+            } else if (yResAbs > xResAbs && yResAbs > 25) {
+                direction = (yRes > 0) ? "Down" : "Up";
+            }
+            return direction;
+        }
+    
+        //  取得两点之间直线距离
+        function getDistance(startX, startY, endX, endY) {
+            return Math.sqrt(Math.pow((startX - endX), 2) + Math.pow((startY - endY), 2));
+        }
+    
+        function getLength(pos) {
+            return Math.sqrt(Math.pow(pos.x, 2) + Math.pow(pos.y, 2));
+        }
+    
+        function cross(v1, v2) {
+            return v1.x * v2.y - v2.x * v1.y;
+        }
+    
+        //  取向量
+        function getVector(startX, startY, endX, endY) {
+            return (startX * endX) + (startY * endY);
+        }
+    
+        //  获取角度
+        function getAngle(v1, v2) {
+            var mr = getLength(v1) * getLength(v2);
+            if (mr === 0) {
+                return 0
+            };
+            var r = getVector(v1.x, v1.y, v2.x, v2.y) / mr;
+            if (r > 1) {
+                r = 1;
+            }
+            return Math.acos(r);
+        }
+    
+        //  获取旋转的角度
+        function getRotateAngle(v1, v2) {
+            var angle = getAngle(v1, v2);
+            if (cross(v1, v2) > 0) {
+                angle *= -1;
+            }
+            return angle * 180 / Math.PI;
+        }
+    
+        //  包装一个新的事件对象
+        function wrapEvent(ev, obj) {
+            var res = {
+                touches: ev.touches,
+                type: ev.type
+            };
+            if (typeOf(obj) === "object") {
+                for (var i in obj) {
+                    res[i] = obj[i];
+                }
+            }
+            return res;
+        }
+    
+        //  构造函数
+        function Toucher(selector) {
+            return new Toucher.fn.init(selector);
+        }
+    
+        Toucher.fn = Toucher.prototype = {
+    
+            //  修改原型构造器
+            constructor: Toucher,
+    
+            //  初始化方法
+            init: function(selector) {
+                this.el = document.querySelector(selector) || document.body;
+                this.scale = 1;
+                this.pinchStartLen = null;
+                this.isDoubleTap = false;
+                this.triggedSwipeStart = false;
+                this.triggedLongTap = false;
+                this.delta = null;
+                this.last = null;
+                this.now = null;
+                this.tapTimeout = null;
+                this.singleTapTimeout = null;
+                this.longTapTimeout = null;
+                this.swipeTimeout = null;
+                this.startPos = {};
+                this.endPos = {};
+                this.preTapPosition = {};
+    
+                this.cfg = {
+                    doubleTapTime: 400,
+                    longTapTime: 700
+                };
+    
+                //  支持的事件列表
+                this.singleTap = function() {};
+                this.doubleTapTime = function() {};
+                this.longTap = function() {};
+                this.swipe = function() {};
+                this.swipeStart = function() {};
+                this.swipeEnd = function() {};
+                this.swipeUp = function() {};
+                this.swipeRight = function() {};
+                this.swipeDown = function() {};
+                this.swipeLeft = function() {};
+                this.pinch = function() {};
+                this.rotate = function() {};
+    
+                //  绑定4个事件
+                bindEv(this.el, "touchstart", this._start.bind(this));
+                bindEv(this.el, "touchmove", this._move.bind(this));
+                bindEv(this.el, "touchcancel", this._cancel.bind(this));
+                bindEv(this.el, "touchend", this._end.bind(this));
+                return this;
+            },
+    
+            //  提供config方法进行配置
+            config: function(option) {
+                if (typeOf(option) !== "object") {
+                    throw new Error("method Toucher.config must pass in an anguments which is an instance of Object, but passed in " + option.toString());
+                }
+                for (var i in option) {
+                    this.cfg[i] = option[i];
+                }
+                return this;
+            },
+    
+            //  on方法绑定事件
+            on: function(name, callback) {
+                if (typeOf(callback) === "function") {
+                    this[name] = callback;
+                }
+                return this;
+            },
+    
+            //  手指刚触碰到屏幕
+            _start: function(ev) {
+                if (!ev.touches || ev.touches.length === 0) {
+                    return;
+                }
+    
+                var self = this;
+                var otherToucher, v, preV = this.preV;
+    
+                self.now = getTimeStr();
+                self.startPos = getPosInfo(ev);
+                self.delta = self.now - (self.last || self.now);
+                self.triggedSwipeStart = false;
+                self.triggedLongTap = false;
+    
+                //  快速双击
+                if (JSON.stringify(self.preTapPosition).length > 2 && self.delta < self.cfg.doubleTapTime && getDistance(self.preTapPosition.clientX, self.preTapPosition.clientY, self.startPos.clientX, self.startPos.clientY) < 25) {
+                    self.isDoubleTap = true;
+                }
+    
+                //  长按定时
+                self.longTapTimeout = setTimeout(function() {
+                    _wrapped = {
+                        el: self.el,
+                        type: "longTap",
+                        timeStr: getTimeStr(),
+                        position: self.startPos
+                    };
+                    self.longTap(_wrapped);
+                    self.triggedLongTap = true;
+                }, self.cfg.longTapTime);
+    
+                //  多个手指放到屏幕
+                if (ev.touches.length > 1) {
+                    self._cancelLongTap();
+                    otherToucher = ev.touches[1];
+                    v = {
+                        x: otherToucher.pageX - self.startPos.pageX,
+                        y: otherToucher.pageY - self.startPos.pageY
+                    };
+                    this.preV = v;
+                    self.pinchStartLen = getLength(v);
+                    self.isDoubleTap = false;
+                }
+    
+                self.last = self.now;
+                self.preTapPosition = self.startPos;
+    
+                ev.preventDefault();
+            },
+    
+            //  手指在屏幕上移动
+            _move: function(ev) {
+                if (!ev.touches || ev.touches.length === 0) {
+                    return;
+                }
+    
+                var v, otherToucher;
+                var self = this;
+                var len = ev.touches.length;
+                var posNow = getPosInfo(ev);
+                var preV = self.preV;
+                var currentX = posNow.pageX;
+                var currentY = posNow.pageY;
+    
+                //  手指移动取消长按事件和双击
+                self._cancelLongTap();
+                self.isDoubleTap = false;
+    
+                //  一次按下抬起只触发一次swipeStart
+                if (!self.triggedSwipeStart) {
+                    _wrapped = {
+                        el: self.el,
+                        type: "swipetart",
+                        timeStr: getTimeStr(),
+                        position: posNow
+                    };
+                    self.swipeStart(_wrapped);
+                    self.triggedSwipeStart = true;
+                } else {
+                    _wrapped = {
+                        el: self.el,
+                        type: "swipe",
+                        timeStr: getTimeStr(),
+                        position: posNow
+                    };
+                    self.swipe(_wrapped);
+                }
+    
+                if (len > 1) {
+                    otherToucher = ev.touches[1];
+                    v = {
+                        x: otherToucher.pageX - currentX,
+                        y: otherToucher.pageY - currentY
+                    };
+    
+                    //  缩放
+                    _wrapped = wrapEvent(ev, {
+                        el: self.el,
+                        type: "pinch",
+                        scale: getLength(v) / this.pinchStartLen,
+                        timeStr: getTimeStr(),
+                        position: posNow
+                    });
+                    self.pinch(_wrapped);
+    
+                    //  旋转
+                    _wrapped = wrapEvent(ev, {
+                        el: self.el,
+                        type: "rotate",
+                        angle: getRotateAngle(v, preV),
+                        timeStr: getTimeStr(),
+                        position: posNow
+                    });
+                    self.rotate(_wrapped);
+    
+                    ev.preventDefault();
+                }
+    
+                self.endPos = posNow;
+            },
+    
+            //  触碰取消
+            _cancel: function(ev) {
+                clearTimeout(this.longTapTimeout);
+                clearTimeout(this.tapTimeout);
+                clearTimeout(this.swipeTimeout);
+                clearTimeout(self.singleTapTimeout);
+            },
+    
+            //  手指从屏幕离开
+            _end: function(ev) {
+                if (!ev.changedTouches) {
+                    return;
+                }
+    
+                //  取消长按
+                this._cancelLongTap();
+    
+                var self = this;
+                var direction = getDirection(self.endPos.clientX, self.endPos.clientY, self.startPos.clientX, self.startPos.clientY);
+                var callback;
+    
+                if (direction !== "") {
+                    self.swipeTimeout = setTimeout(function() {
+                        _wrapped = wrapEvent(ev, {
+                            el: self.el,
+                            type: "swipe",
+                            timeStr: getTimeStr(),
+                            position: self.endPos
+                        });
+                        self.swipe(_wrapped);
+    
+                        //  获取具体的swipeXyz方向
+                        callback = self["swipe" + direction];
+                        if (typeOf(callback) === "function") {
+                            _wrapped = wrapEvent(ev, {
+                                el: self.el,
+                                type: "swipe" + direction,
+                                timeStr: getTimeStr(),
+                                position: self.endPos
+                            });
+                            callback(_wrapped);
+                        }
+    
+                        _wrapped = wrapEvent(ev, {
+                            el: self.el,
+                            type: "swipeEnd",
+                            timeStr: getTimeStr(),
+                            position: self.endPos
+                        });
+                        self.swipeEnd(_wrapped);
+    
+                    }, 0);
+                } else if (!self.triggedLongTap) {
+                    self.tapTimeout = setTimeout(function() {
+                        if (self.isDoubleTap) {
+                            _wrapped = wrapEvent(ev, {
+                                el: self.el,
+                                type: "doubleTap",
+                                timeStr: getTimeStr(),
+                                position: self.startPos
+                            });
+                            self.doubleTap(_wrapped);
+                            clearTimeout(self.singleTapTimeout);
+                            self.isDoubleTap = false;
+                        } else {
+                            self.singleTapTimeout = setTimeout(function() {
+                                _wrapped = wrapEvent(ev, {
+                                    el: self.el,
+                                    type: "singleTap",
+                                    timeStr: getTimeStr(),
+                                    position: self.startPos
+                                });
+                                self.singleTap(_wrapped);
+                            }, 200);
+                        }
+                    }, 0);
+                }
+    
+                this.startPos = {};
+                this.endPos = {};
+            },
+    
+            //  取消长按定时器
+            _cancelLongTap: function() {
+                if (typeOf(this.longTapTimeout) !== "null") {
+                    clearTimeout(this.longTapTimeout);
+                }
+            }
+        };
+    
+        Toucher.fn.init.prototype = Toucher.fn;
+    
+        return Toucher;
+    
+    }));
+        
+    </script>
+    <script type="text/javascript">
+        /**
+         * 结合Toucher的demo
+         */
+        
+        "use strict";
+        
+        window.onload = function() {
+        
+            var prefixs = ["Webkit", "Moz", "Ms", "O", ""];
+            var screenWidth = window.innerWidth;
+        
+            //  x-slider
+            var xSElToucher = Toucher("#x-slider-container");
+            var xSEl = document.querySelector("#x-slider");
+            var xSTransIndex = 0;
+            var xSTransform;
+        
+            xSElToucher
+                .on("swipeLeft", function(e) {
+                    xSTransIndex--;
+                    if (xSTransIndex < -2) {
+                        xSTransIndex = -2;
+                        return;
+                    }
+                    xSTransform = "translate3d(" + xSTransIndex * screenWidth + "px, 0px, 0px)";
+                    setTranstion(xSEl, "all 0.3s cubic-bezier(0.1, 0.57, 0.1, 1)");
+                    setTransform(xSEl, xSTransform);
+                })
+                .on("swipeRight", function(e) {
+                    xSTransIndex++;
+                    if (xSTransIndex > 0) {
+                        xSTransIndex = 0;
+                        return;
+                    }
+                    xSTransform = "translate3d(" + xSTransIndex * screenWidth + "px, 0px, 0px)";
+                    setTranstion(xSEl, "all 0.3s cubic-bezier(0.1, 0.57, 0.1, 1)");
+                    setTransform(xSEl, xSTransform);
+                });
+        
+            //  y-slider
+            var ySElToucher = Toucher("#y-slider-container");
+            var ySEl = document.querySelector("#y-slider");
+            var moveHeight = ySEl.children[0].offsetHeight;
+            var ySTransIndex = 0;
+            var ySTransform;
+        
+            ySElToucher
+                .on("swipeUp", function(e) {
+                    ySTransIndex--;
+                    if (ySTransIndex < -2) {
+                        ySTransIndex = -2;
+                        return;
+                    }
+                    ySTransform = "translate3d(0px, " + ySTransIndex * moveHeight + "px, 0px)";
+                    setTranstion(ySEl, "all 0.3s cubic-bezier(0.1, 0.57, 0.1, 1)");
+                    setTransform(ySEl, ySTransform);
+                })
+                .on("swipeDown", function(e) {
+                    ySTransIndex++;
+                    if (ySTransIndex > 0) {
+                        ySTransIndex = 0;
+                        return;
+                    }
+                    ySTransform = "translate3d(0px, " + ySTransIndex * moveHeight + "px, 0px)";
+                    setTranstion(ySEl, "all 0.3s cubic-bezier(0.1, 0.57, 0.1, 1)");
+                    setTransform(ySEl, ySTransform);
+                });
+        
+            //  pinch
+            var pinchToucher = Toucher("#pinch-container");
+            var pinchEl = document.querySelector("#pinch-img-item");
+            var pinchTransform, scale;
+        
+            pinchToucher.on("pinch", function(e) {
+                scale = e.scale;
+                if (scale < 0.4) {
+                    return;
+                } else if (scale > 2.5) {
+                    return;
+                }
+        
+                pinchTransform = "scale3d(" + scale + ", " + scale + ", 1)";
+                setTransform(pinchEl, pinchTransform);
+            });
+        
+            //  rotate
+            var rotateToucher = Toucher("#rotate-container");
+            var rotateEl = document.querySelector("#rotate-container");
+            var rotateTransform, angle;
+        
+            rotateToucher.on("rotate", function(e) {
+                angle = e.angle;
+                rotateTransform = "rotate(" + angle + "deg)";
+                setTransform(rotateEl, rotateTransform);
+            });
+        
+            //  设置元素的transition样式
+            function setTranstion(el, style) {
+                prefixs.forEach(function(prefix) {
+                    el.style[prefix + "Transition"] = style;
+                });
+            }
+        
+            //  设置元素的transform样式
+            function setTransform(el, style) {
+                el.style.transform = style;
+            }
+        
+            //  获取元素的transform样式,并以对象的形式返回,只判断了少量情况
+            function getTransform(el) {
+                var curTransform, res, replaced, transName, matrixObj, _tmp,
+                    transReg = /^[\w\W]+\(/g,
+                    endBrackets = /\($/,
+                    elStyle = el.style;
+                curTransform = el.transform || elStyle.webkitTransform || elStyle.mozTransform || elStyle.oTransform || elStyle.msTransform;
+        
+                if (curTransform) {
+                    res = {};
+                    curTransform.split(") ").forEach(function(item) {
+                        _tmp = {};
+                        transName = item.match(transReg)[0].replace("(", "");
+                        replaced = item.replace(transReg, "").replace(endBrackets, "");
+                        switch (transName) {
+                            case "translate3d":
+                            case "rotate3d":
+                                replaced = replaced.split(",");
+                                _tmp["x"] = parseFloat(replaced[0] || 0);
+                                _tmp["y"] = parseFloat(replaced[1] || 0);
+                                _tmp["z"] = parseFloat(replaced[2] || 0);
+                                res[transName] = _tmp;
+                                break;
+        
+                            case "scale3d":
+                                replaced = replaced.split(",");
+                                _tmp["x"] = parseFloat(replaced[0] || 1);
+                                _tmp["y"] = parseFloat(replaced[1] || 1);
+                                _tmp["z"] = parseFloat(replaced[2] || 1);
+                                res[transName] = _tmp;
+                                break;
+        
+                            case "scale":
+                                replaced = replaced.split(",");
+                                _tmp["x"] = parseFloat(replaced[0] || 1);
+                                _tmp["y"] = parseFloat(replaced[1] || 1);
+                                res[transName] = _tmp;
+                                break;
+                            case "matrix":
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+                }
+        
+                return res;
+            }
+        };
+        
+    </script>
 </body>
 
 </html>
