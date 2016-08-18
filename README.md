@@ -2,8 +2,6 @@
 
 移动端手势库
 
-![demos](img/Toucher.gif)
-
 #### API
         
     Toucher("#node").config(Object).on(Object)
@@ -54,9 +52,13 @@ swipeUp | 左滑 |  Fucntion
 swipeRight | 右滑 |  Fucntion
 swipeDown | 下滑 |  Fucntion
 swipeLeft | 左滑 |  Fucntion
+pinch | 缩放 |  Fucntion
+rotate | 旋转 |  Fucntion
 
-##### TODO
-- pinch缩放事件
-- rotate旋转事件
+#### 在线体验
 
-参考腾讯AlloyTeam手势库[AlloyFinger](https://github.com/AlloyTeam/AlloyFinger)
+扫描下方二维码或者手机直接访问https://rwson.github.io/Toucher/
+
+![QR Code](img/demo.png)
+
+- 参考腾讯AlloyTeam手势库[AlloyFinger](https://github.com/AlloyTeam/AlloyFinger)实现
