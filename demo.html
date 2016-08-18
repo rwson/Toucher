@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,target-densitydpi=high-dpi,initial-scale=1.0,minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .title {
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        /*横向滚动*/        
+        .x-slider-container {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .x-slider {
+            transform-origin: 0 0;
+            transform: translate3d(0px, 0px, 0px);
+            display: flex;
+        }
+        
+        .x-slider-img {
+            -webkit-flex-shrink: 0;
+            width: 100%;
+            height: 200px;
+        }
+        
+        .x-slider-img-item {
+            width: 100%;
+            height: 100%;
+        }
+
+        /*纵向滚动*/
+        .y-slider-container {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .y-slider {
+            transform-origin: 0 0;
+            transform: translate3d(0px, 0px, 0px);
+        }
+        
+        .y-slider-img {
+            width: 100%;
+            height: 200px;
+        }
+        
+        .y-slider-img-item {
+            width: 100%;
+            height: 100%;
+        }
+
+        /*缩放*/
+        .pinch-title {
+            margin: 300px 0 0 0;
+        }
+
+        .pinch-container {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        
+        .pinch-img-item {
+            width: 100%;
+            height: 100%;
+            transform-origin: center;
+            transform: scale(1, 1);
+        }
+
+        /*旋转*/
+        .rotate-container {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 300px;
+            overflow: hidden;
+        }
+
+        .pinch-img-item {
+            width: 100%;
+            height: 100%;
+            transform-origin: center;
+            transform: rotate3d(0, 0, 0);
+        }
+
+    </style>
+</head>
+
+<body>
+    <h1 class="title">横向滚动</h1>
+    <div class="x-slider-container" id="x-slider-container">
+        <div class="x-slider" id="x-slider">
+            <div class="x-slider-img">
+                <img src="img/1.jpg" class="x-slider-img-item" />
+            </div>
+            <div class="x-slider-img">
+                <img src="img/2.jpg" class="x-slider-img-item" />
+            </div>
+            <div class="x-slider-img">
+                <img src="img/3.jpg" class="x-slider-img-item" />
+            </div>
+        </div>
+    </div>
+    <h1 class="title">纵向滚动</h1>
+    <div class="y-slider-container" id="y-slider-container">
+        <div class="y-slider" id="y-slider">
+            <div class="y-slider-img">
+                <img src="img/1.jpg" class="y-slider-img-item" />
+            </div>
+            <div class="y-slider-img">
+                <img src="img/2.jpg" class="y-slider-img-item" />
+            </div>
+            <div class="y-slider-img">
+                <img src="img/3.jpg" class="y-slider-img-item" />
+            </div>
+        </div>
+    </div>
+    <h1 class="title pinch-title">缩放</h1>
+    <div class="pinch-container" id="pinch-container">
+        <img src="img/1.jpg" class="pinch-img-item" id="pinch-img-item" />
+    </div>
+    <h1 class="title pinch-title">旋转</h1>
+    <div class="rotate-container" id="rotate-container">
+        <img src="img/1.jpg" class="pinch-img-item" id="rotate-img-item" />
+    </div>
+    <script src="src/Toucher.js"></script>
+    <script src="js/demo.js"></script>
+</body>
+
+</html>

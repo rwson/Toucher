@@ -323,9 +323,6 @@
                     timeStr: getTimeStr(),
                     position: posNow
                 });
-
-                console.log(_wrapped);
-
                 self.rotate(_wrapped);
 
                 ev.preventDefault();
@@ -376,6 +373,15 @@
                         });
                         callback(_wrapped);
                     }
+
+                    _wrapped = wrapEvent(ev, {
+                        el: self.el,
+                        type: "swipeEnd",
+                        timeStr: getTimeStr(),
+                        position: self.endPos
+                    });
+                    self.swipeEnd(_wrapped);
+
                 }, 0);
             } else if (!self.triggedLongTap) {
                 self.tapTimeout = setTimeout(function() {
