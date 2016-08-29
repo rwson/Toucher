@@ -202,10 +202,35 @@
         },
 
         //  on方法绑定事件
-        on: function(name, callback) {
-            if (typeOf(callback) === "function") {
-                this[name] = callback;
-            }
+        /**
+         * var toucher = Toucher({...});
+         *
+         * toucher.on("swipe", function(ev) {
+         *     //   ...
+         * });
+         *
+         * //   or
+         *
+         * toucher.on("tap", "#id", function(ev) {
+         *     //   ...
+         * });
+         * 
+         */
+        on: function(name, el, callback) {
+            if(arguments.length === 2) {
+                callback = el;
+                if (typeOf(callback) === "function") {
+                    this[name] = callback;
+                }
+            } else if(arguments.length === 3) {
+                el = this.el.querySelector(el);
+                if(el && typeof el === "object" && el.nodeType === 1 && _typeOf(el.tagName) === "string" && _typeOf(callback) === "function") {
+                    this.name = {
+                        target: el,
+                        callback: callback
+                    };
+                }
+            }    
             return this;
         },
 
