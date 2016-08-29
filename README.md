@@ -25,7 +25,11 @@
 来配置相关事件的触发条件
 
 
-    touch.on(Object)
+    touch.on(name, callbck);
+    
+或
+
+    touch.on(name, target, callbck);
 
 来绑定事件
 
@@ -40,7 +44,9 @@ doubleTapTime | 在多少毫秒内连续点击两次屏幕,触发doubleTap,默�
 
 - on
 
-属性 | 含义  |  类型
+###### 两个参数
+
+name属性 | 含义 |  callback类型
 ---|---|---
 singleTap | 轻击(单个手指) |  Fucntion
 doubleTap | 手指放到屏幕(单个手指) |  Fucntion
@@ -54,6 +60,12 @@ swipeDown | 下滑 |  Fucntion
 swipeLeft | 左滑 |  Fucntion
 pinch | 缩放 |  Fucntion
 rotate | 旋转 |  Fucntion
+
+###### 三个参数
+
+name和callback和上表一样
+
+target可以为具体的css selector, 也可以为具体的DOM元素(document.querySelector(selector)之类方法获取到的)
 
 #### 在线体验
 

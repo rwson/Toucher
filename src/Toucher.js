@@ -217,20 +217,21 @@
          * 
          */
         on: function(name, el, callback) {
-            if(arguments.length === 2) {
+            if (arguments.length === 2) {
                 callback = el;
                 if (typeOf(callback) === "function") {
                     this[name] = callback;
                 }
-            } else if(arguments.length === 3) {
-                el = this.el.querySelector(el);
-                if(el && typeof el === "object" && el.nodeType === 1 && _typeOf(el.tagName) === "string" && _typeOf(callback) === "function") {
+            } else if (arguments.length === 3) {
+                //  判断是否已经是一个DOM
+                el = el instanceof HTMLElement ? el : _typeOf(el) === "string" ?  this.el.querySelector(el) : null;
+                if (el && typeof el === "object" && el.nodeType === 1 && _typeOf(el.tagName) === "string" && _typeOf(callback) === "function") {
                     this.name = {
-                        target: el,
+                        el: el,
                         callback: callback
                     };
                 }
-            }    
+            }
             return this;
         },
 
@@ -241,7 +242,9 @@
             }
 
             var self = this;
-            var otherToucher, v, preV = this.preV;
+            var otherToucher, v,
+                preV = this.preV,
+                target = ev.target;
 
             self.now = getTimeStr();
             self.startPos = getPosInfo(ev);
@@ -262,7 +265,11 @@
                     timeStr: getTimeStr(),
                     position: self.startPos
                 };
-                self.longTap(_wrapped);
+                if (_typeOf(self.longTap) === "function") {
+                    self.longTap(_wrapped);
+                } else if (_typeOf(self.longTap) === "object" && _typeOf(self.longTap.callback) === "function" && target === self.longTap.el) {
+                    self.longTap.callback(_wrapped);
+                }
                 self.triggedLongTap = true;
             }, self.cfg.longTapTime);
 
@@ -298,6 +305,7 @@
             var preV = self.preV;
             var currentX = posNow.pageX;
             var currentY = posNow.pageY;
+            var target = ev.target;
 
             //  手指移动取消长按事件和双击
             self._cancelLongTap();
@@ -311,7 +319,11 @@
                     timeStr: getTimeStr(),
                     position: posNow
                 };
-                self.swipeStart(_wrapped);
+                if (_typeOf(self.swipeStart) === "function") {
+                    self.swipeStart(_wrapped);
+                } else if (_typeOf(self.swipeStart) === "object" && _typeOf(self.swipeStart.callback) === "function" && target === self.swipeStart.el) {
+                    self.swipeStart.callback(_wrapped);
+                }
                 self.triggedSwipeStart = true;
             } else {
                 _wrapped = {
@@ -338,7 +350,11 @@
                     timeStr: getTimeStr(),
                     position: posNow
                 });
-                self.pinch(_wrapped);
+                if (_typeOf(self.pinch) === "function") {
+                    self.pinch(_wrapped);
+                } else if (_typeOf(self.pinch) === "object" && _typeOf(self.pinch.callback) === "function" && target === self.pinch.el) {
+                    self.pinch.callback(_wrapped);
+                }
 
                 //  旋转
                 _wrapped = wrapEvent(ev, {
@@ -348,7 +364,11 @@
                     timeStr: getTimeStr(),
                     position: posNow
                 });
-                self.rotate(_wrapped);
+                if (_typeOf(self.rotate) === "function") {
+                    self.rotate(_wrapped);
+                } else if (_typeOf(self.rotate) === "object" && _typeOf(self.rotate.callback) === "function" && target === self.rotate.el) {
+                    self.rotate.callback(_wrapped);
+                }
 
                 ev.preventDefault();
             }
@@ -375,7 +395,7 @@
 
             var self = this;
             var direction = getDirection(self.endPos.clientX, self.endPos.clientY, self.startPos.clientX, self.startPos.clientY);
-            var callback;
+            var callback, target = ev.target;
 
             if (direction !== "") {
                 self.swipeTimeout = setTimeout(function() {
@@ -385,18 +405,24 @@
                         timeStr: getTimeStr(),
                         position: self.endPos
                     });
-                    self.swipe(_wrapped);
+                    if (_typeOf(self.swipe) === "function") {
+                        self.swipe(_wrapped);
+                    } else if (_typeOf(self.swipe) === "object" && _typeOf(self.swipe.callback) === "function" && target === self.swipe.el) {
+                        self.swipe.callback(_wrapped);
+                    }
 
                     //  获取具体的swipeXyz方向
                     callback = self["swipe" + direction];
+                    _wrapped = wrapEvent(ev, {
+                        el: self.el,
+                        type: "swipe" + direction,
+                        timeStr: getTimeStr(),
+                        position: self.endPos
+                    });
                     if (typeOf(callback) === "function") {
-                        _wrapped = wrapEvent(ev, {
-                            el: self.el,
-                            type: "swipe" + direction,
-                            timeStr: getTimeStr(),
-                            position: self.endPos
-                        });
                         callback(_wrapped);
+                    } else if (_typeOf(callback) === "object" && _typeOf(callback.callback) === "function" && target === callback.el) {
+                        callback.callback(_wrapped);
                     }
 
                     _wrapped = wrapEvent(ev, {
@@ -405,8 +431,11 @@
                         timeStr: getTimeStr(),
                         position: self.endPos
                     });
-                    self.swipeEnd(_wrapped);
-
+                    if (_typeOf(self.swipeEnd) === "function") {
+                        self.swipeEnd(_wrapped);
+                    } else if (_typeOf(self.swipeEnd) === "object" && _typeOf(self.swipeEnd.callback) === "function" && target === self.swipeEnd.el) {
+                        self.swipeEnd.callback(_wrapped);
+                    }
                 }, 0);
             } else if (!self.triggedLongTap) {
                 self.tapTimeout = setTimeout(function() {
@@ -417,7 +446,11 @@
                             timeStr: getTimeStr(),
                             position: self.startPos
                         });
-                        self.doubleTap(_wrapped);
+                        if (_typeOf(self.doubleTap) === "function") {
+                            self.doubleTap(_wrapped);
+                        } else if (_typeOf(self.doubleTap) === "object" && _typeOf(self.doubleTap.callback) === "function" && target === self.doubleTap.el) {
+                            self.doubleTap(_wrapped);
+                        }
                         clearTimeout(self.singleTapTimeout);
                         self.isDoubleTap = false;
                     } else {
@@ -428,7 +461,11 @@
                                 timeStr: getTimeStr(),
                                 position: self.startPos
                             });
-                            self.singleTap(_wrapped);
+                            if (_typeOf(self.singleTap) === "function") {
+                                self.singleTap(_wrapped);
+                            } else if (_typeOf(self.singleTap) === "object" && _typeOf(self.singleTap.callback) === "function" && target === self.doubleTap.el) {
+                                self.singleTap.callback(_wrapped);
+                            }
                         }, 200);
                     }
                 }, 0);

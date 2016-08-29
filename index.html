@@ -11,6 +11,12 @@
             padding: 0;
         }
 
+        #toucher {
+            width: 100%;
+            height: 400px;
+            background: yellow;
+        }
+
     </style>
 </head>
 
@@ -28,7 +34,7 @@
         var toucher = Toucher("#toucher");
         var result = document.querySelector("#result");
 
-        toucher.on("singleTap", function(e) {
+        toucher.on("singleTap", "#toucher",function(e) {
                 result.innerHTML = e.type;
             })
             .on("doubleTap", function(e) {
