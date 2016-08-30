@@ -244,8 +244,8 @@
                     this[name] = callback;
                 }
             } else if (arguments.length === 3) {
-                //  判断是否已经是一个DOM或者HTMLCollection对象
-                el = (el instanceof HTMLElement || el instanceof HTMLCollection) ? el : 
+                //  判断是否已经是一个DOM或者NodeList
+                el = (el instanceof HTMLElement || el instanceof NodeList) ? el : 
                 _typeOf(el) === "string" ?  this.el.querySelectorAll(el) : null;
                 _type = _typeOf(el);
 
