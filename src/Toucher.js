@@ -157,7 +157,7 @@
 
     //  事件模块
     var Event = (function () {
-        
+
         var storeEvents = {};
 
         return {
@@ -268,20 +268,6 @@
                 longTapTime: 700
             };
 
-            //  支持的事件列表
-            this.singleTap = function() {};
-            this.doubleTapTime = function() {};
-            this.longTap = function() {};
-            this.swipe = function() {};
-            this.swipeStart = function() {};
-            this.swipeEnd = function() {};
-            this.swipeUp = function() {};
-            this.swipeRight = function() {};
-            this.swipeDown = function() {};
-            this.swipeLeft = function() {};
-            this.pinch = function() {};
-            this.rotate = function() {};
-
             //  绑定4个事件
             bindEv(this.el, "touchstart", this._start.bind(this));
             bindEv(this.el, "touchmove", this._move.bind(this));
@@ -315,7 +301,10 @@
          *     //   ...
          * });
          *
+         * support events: singleTap,longTap,swipe,swipeStart,swipeEnd,swipeUp,swipeRight,swipeDown,swipeLeft,pinch,rotate
+         *
          */
+
         on: function(type, el, callback) {
             Event.add(type, el, callback);
             return this;
@@ -397,11 +386,11 @@
             if (!self.triggedSwipeStart) {
                 _wrapped = {
                     el: self.el,
-                    type: "swipetart",
+                    type: "swipeStart",
                     timeStr: getTimeStr(),
                     position: posNow
                 };
-                Event.trigger("swipetart", target, _wrapped);
+                Event.trigger("swipeStart", target, _wrapped);
                 self.triggedSwipeStart = true;
             } else {
                 _wrapped = {
