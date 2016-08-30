@@ -166,7 +166,8 @@
 
             //  add an event handle
             add: function (type, el, handler) {
-                var len = arguments.length,
+                var selector = el,
+                    len = arguments.length,
                     finalObject = {}, _type;
                 /**
                  * Event.add("swipe", function() {
@@ -191,6 +192,7 @@
                     _type = _typeOf(el);
                     finalObject = {
                         type: _type,
+                        selector: selector,
                         el: _type === "nodelist" ? toArray(el) : el,
                         handler: handler
                     };
@@ -204,10 +206,16 @@
             },
 
             //  remove an event handle
-            remove: function (type, el) {
+            remove: function (type, selector) {
                 var len = arguments.length;
-                if (len === 1 && _typeOf(type) === "string" && _typeOf(storeEvents[type]) === "array" && storeEvents[type].length) {
-                    Event[type] = [];
+                if (_typeOf(type) === "string" && _typeOf(storeEvents[type]) === "array" && storeEvents[type].length) {
+                    if (len === 1) {
+                        storeEvents[type] = [];
+                    } else if (len === 2) {
+                        storeEvents[type] = storeEvents[type].filter(function (item) {
+                            return !(item.selector === selector || _typeOf(selector) !== "string" && item.selector.isEqualNode(selector));
+                        });
+                    }
                 }
             },
 
@@ -317,6 +325,20 @@
 
         on: function (type, el, callback) {
             Event.add(type, el, callback);
+            return this;
+        },
+
+        //  off 解除绑定
+        /**
+         *  var toucher = Toucher({...});
+         *  toucher.off(type);
+         *
+         *  //  or
+         *
+         *  toucher.off(type, selector);
+         */
+        off: function (type, selector) {
+            Event.remove(type, selector);
             return this;
         },
 

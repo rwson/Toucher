@@ -102,6 +102,30 @@ name和callback和上表一样
 
 target可以为具体的css selector, 也可以为具体的DOM元素(document.querySelector(selector)之类方法获取到的)
 
+- off
+
+解除之前绑定过的代理事件(之前怎样绑定的就怎样解除)
+
+###### 例子
+
+    var toucher = Toucher("#div");
+    
+    //  绑定
+    toucher.on("singleTap", function(ev){});
+    
+    //  解除绑定
+    toucher.off("sigleTap");
+    
+或者
+    
+    var toucher = Toucher("#div");
+    
+    //  绑定
+    toucher.on("singleTap", ".list-item", function(ev){});
+    
+    //  解除绑定
+    toucher.off("sigleTap", ".list-item");
+
 #### 在线体验
 
 扫描下方二维码或者手机直接访问https://rwson.github.io/Toucher/
