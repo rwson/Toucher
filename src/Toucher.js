@@ -267,7 +267,7 @@
                 };
                 if (_typeOf(self.longTap) === "function") {
                     self.longTap(_wrapped);
-                } else if (_typeOf(self.longTap) === "object" && _typeOf(self.longTap.callback) === "function" && target === self.longTap.el) {
+                } else if (_typeOf(self.longTap) === "object" && _typeOf(self.longTap.callback) === "function" && self.longTap.el.isEqualNode(target)) {
                     self.longTap.callback(_wrapped);
                 }
                 self.triggedLongTap = true;
@@ -321,7 +321,7 @@
                 };
                 if (_typeOf(self.swipeStart) === "function") {
                     self.swipeStart(_wrapped);
-                } else if (_typeOf(self.swipeStart) === "object" && _typeOf(self.swipeStart.callback) === "function" && target === self.swipeStart.el) {
+                } else if (_typeOf(self.swipeStart) === "object" && _typeOf(self.swipeStart.callback) === "function" && self.swipeStart.el.isEqualNode(target)) {
                     self.swipeStart.callback(_wrapped);
                 }
                 self.triggedSwipeStart = true;
@@ -352,7 +352,7 @@
                 });
                 if (_typeOf(self.pinch) === "function") {
                     self.pinch(_wrapped);
-                } else if (_typeOf(self.pinch) === "object" && _typeOf(self.pinch.callback) === "function" && target === self.pinch.el) {
+                } else if (_typeOf(self.pinch) === "object" && _typeOf(self.pinch.callback) === "function" && self.pinch.el.isEqualNode(target)) {
                     self.pinch.callback(_wrapped);
                 }
 
@@ -366,7 +366,7 @@
                 });
                 if (_typeOf(self.rotate) === "function") {
                     self.rotate(_wrapped);
-                } else if (_typeOf(self.rotate) === "object" && _typeOf(self.rotate.callback) === "function" && target === self.rotate.el) {
+                } else if (_typeOf(self.rotate) === "object" && _typeOf(self.rotate.callback) === "function" && self.rotate.el.isEqualNode(target)) {
                     self.rotate.callback(_wrapped);
                 }
 
@@ -407,7 +407,7 @@
                     });
                     if (_typeOf(self.swipe) === "function") {
                         self.swipe(_wrapped);
-                    } else if (_typeOf(self.swipe) === "object" && _typeOf(self.swipe.callback) === "function" && target === self.swipe.el) {
+                    } else if (_typeOf(self.swipe) === "object" && _typeOf(self.swipe.callback) === "function" && self.swipe.el.isEqualNode(target)) {
                         self.swipe.callback(_wrapped);
                     }
 
@@ -421,7 +421,7 @@
                     });
                     if (typeOf(callback) === "function") {
                         callback(_wrapped);
-                    } else if (_typeOf(callback) === "object" && _typeOf(callback.callback) === "function" && target === callback.el) {
+                    } else if (_typeOf(callback) === "object" && _typeOf(callback.callback) === "function" && callback.el.isEqualNode(target)) {
                         callback.callback(_wrapped);
                     }
 
@@ -433,7 +433,7 @@
                     });
                     if (_typeOf(self.swipeEnd) === "function") {
                         self.swipeEnd(_wrapped);
-                    } else if (_typeOf(self.swipeEnd) === "object" && _typeOf(self.swipeEnd.callback) === "function" && target === self.swipeEnd.el) {
+                    } else if (_typeOf(self.swipeEnd) === "object" && _typeOf(self.swipeEnd.callback) === "function" && self.swipeEnd.el.isEqualNode(target)) {
                         self.swipeEnd.callback(_wrapped);
                     }
                 }, 0);
@@ -448,7 +448,7 @@
                         });
                         if (_typeOf(self.doubleTap) === "function") {
                             self.doubleTap(_wrapped);
-                        } else if (_typeOf(self.doubleTap) === "object" && _typeOf(self.doubleTap.callback) === "function" && target === self.doubleTap.el) {
+                        } else if (_typeOf(self.doubleTap) === "object" && _typeOf(self.doubleTap.callback) === "function" && self.doubleTap.el.isEqualNode(target)) {
                             self.doubleTap(_wrapped);
                         }
                         clearTimeout(self.singleTapTimeout);
@@ -463,7 +463,7 @@
                             });
                             if (_typeOf(self.singleTap) === "function") {
                                 self.singleTap(_wrapped);
-                            } else if (_typeOf(self.singleTap) === "object" && _typeOf(self.singleTap.callback) === "function" && target === self.doubleTap.el) {
+                            } else if (_typeOf(self.singleTap) === "object" && _typeOf(self.singleTap.callback) === "function" && self.doubleTap.el.isEqualNode(target)) {
                                 self.singleTap.callback(_wrapped);
                             }
                         }, 200);
