@@ -33,6 +33,41 @@
 
 来绑定事件
 
+#### 完整示例
+
+    //  HTML
+    <div id="toucher">
+        <div id="event"></div>
+        <ul>
+            <li class="list-item"></li>
+            <li class="list-item"></li>
+            <li class="list-item"></li>
+            <li class="list-item"></li>
+            <li class="list-item"></li>
+            <li class="list-item"></li>
+        </ul>
+    </div>
+    
+    
+    //  javascript
+    var toucher = Toucher("#toucher");
+    
+    //  回调函数会在任何时候被执行,只要event.target为<div>#toucher或者其子元素
+    toucher.on("singleTap", function(ev) {
+        //  ...
+    });
+    
+    //  只有当event.target为<div>#event的时候,才会执行后面的回调函数
+    toucher.on("singleTap", "#event", function(ev) {
+        //  ...
+    });
+    
+    //  只有当event.target为<li>.list-item的时候,才会执行后面的回调函数
+    toucher.on("singleTap", document.querySelector(".list-item"), function(ev) {
+        //  ...
+    });
+    
+
 ####  支持的配置项(config)和事件列表(on)
 
 - config
