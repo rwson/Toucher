@@ -6,15 +6,15 @@
 
 "use strict";
 
-(function(root, factory) {
+(function (root, factory) {
     if (typeof define === "function" && define.amd) {
-        define([], function() {
+        define([], function () {
             return factory(root);
         });
     } else {
         root.Toucher = factory(root);
     }
-}(window, function(root, undefined) {
+}(window, function (root, undefined) {
 
     if (!"ontouchstart" in window) {
         return;
@@ -103,7 +103,8 @@
         var mr = getLength(v1) * getLength(v2);
         if (mr === 0) {
             return 0
-        };
+        }
+        ;
         var r = getVector(v1.x, v1.y, v2.x, v2.y) / mr;
         if (r > 1) {
             r = 1;
@@ -136,18 +137,19 @@
 
     //  把伪数组转换成数组
     function toArray(list) {
-        if(list && (typeof list === "object") && isFinite(list.length) && (list.length >= 0) && (list.length === Math.floor(list.length)) && list.length < 4294967296) {
+        if (list && (typeof list === "object") && isFinite(list.length) && (list.length >= 0) && (list.length === Math.floor(list.length)) && list.length < 4294967296) {
             return [].slice.call(list);
         }
     }
 
     //  判断一个元素列表里面是否有多个元素
     function isContain(collection, el) {
-        if(arguments.length === 2) {
+        if (arguments.length === 2) {
             return collection.some(function (elItem) {
                 return el.isEqualNode(elItem);
             });
         }
+        return false;
     }
 
     //  生成一个随机id
@@ -165,30 +167,36 @@
             //  add an event handle
             add: function (type, el, handler) {
                 var len = arguments.length,
-                    finalObject = {};
+                    finalObject = {}, _type;
                 /**
                  * Event.add("swipe", function() {
                  *      //  ...
                  * });
                  */
-                if(len === 2 && _typeOf(el) === "function") {
+
+                if (_typeOf(el) === "string") {
+                    el = document.querySelectorAll(el);
+                }
+
+                if (len === 2 && _typeOf(el) === "function") {
                     finalObject = {
                         handler: el
                     };
-                } else if(len === 3 && el instanceof HTMLElement || el instanceof NodeList && _typeOf(handler) === "function") {
+                } else if (len === 3 && el instanceof HTMLElement || el instanceof NodeList && _typeOf(handler) === "function") {
                     /**
                      * Event.add("swipe", "#div", function(ev) {
                      *      //  ...
                      * });
                      */
+                    _type = _typeOf(el);
                     finalObject = {
-                        type: _typeOf(el),
-                        el: el,
+                        type: _type,
+                        el: _type === "nodelist" ? toArray(el) : el,
                         handler: handler
                     };
                 }
 
-                if(!storeEvents[type]) {
+                if (!storeEvents[type]) {
                     storeEvents[type] = [];
                 }
 
@@ -198,7 +206,7 @@
             //  remove an event handle
             remove: function (type, el) {
                 var len = arguments.length;
-                if(len === 1 && _typeOf(type) === "string" && _typeOf(storeEvents[type]) === "array" && storeEvents[type].length) {
+                if (len === 1 && _typeOf(type) === "string" && _typeOf(storeEvents[type]) === "array" && storeEvents[type].length) {
                     Event[type] = [];
                 }
             },
@@ -212,17 +220,19 @@
                  *      //  ...
                  * });
                  */
-                if(len === 3 && _typeOf(storeEvents[type]) === "array" && storeEvents[type].length) {
+                if (len === 3 && _typeOf(storeEvents[type]) === "array" && storeEvents[type].length) {
                     storeEvents[type].forEach(function (item) {
-                        if(item.handler && item.type && item.el) {
-                            argument.target = el;
-                            if(item.type === "nodelist" && isContain(item.el)) {
-                                item.handler(argument);
-                            } else if(item.el.isEqualNode(el)) {
+                        if (_typeOf(item.handler) === "function") {
+                            if (item.type && item.el) {
+                                argument.target = el;
+                                if (item.type === "nodelist" && isContain(item.el, el)) {
+                                    item.handler(argument);
+                                } else if (item.el.isEqualNode && item.el.isEqualNode(el)) {
+                                    item.handler(argument);
+                                }
+                            } else {
                                 item.handler(argument);
                             }
-                        } else {
-                            item.handler(argument);
                         }
                     });
                 }
@@ -241,10 +251,10 @@
         constructor: Toucher,
 
         //  初始化方法
-        init: function(selector) {
-            this.el =  selector instanceof HTMLElement ? selector :
+        init: function (selector) {
+            this.el = selector instanceof HTMLElement ? selector :
                 _typeOf(selector) === "string" ? document.querySelector(selector) : null;
-            if(_typeOf(this.el) === "null") {
+            if (_typeOf(this.el) === "null") {
                 throw new Error("you must specify a particular selector or a particular DOM object");
             }
             this.scale = 1;
@@ -277,7 +287,7 @@
         },
 
         //  提供config方法进行配置
-        config: function(option) {
+        config: function (option) {
             if (typeOf(option) !== "object") {
                 throw new Error("method Toucher.config must pass in an anguments which is an instance of Object, but passed in " + option.toString());
             }
@@ -305,13 +315,13 @@
          *
          */
 
-        on: function(type, el, callback) {
+        on: function (type, el, callback) {
             Event.add(type, el, callback);
             return this;
         },
 
         //  手指刚触碰到屏幕
-        _start: function(ev) {
+        _start: function (ev) {
             if (!ev.touches || ev.touches.length === 0) {
                 return;
             }
@@ -333,7 +343,7 @@
             }
 
             //  长按定时
-            self.longTapTimeout = setTimeout(function() {
+            self.longTapTimeout = setTimeout(function () {
                 _wrapped = {
                     el: self.el,
                     type: "longTap",
@@ -364,7 +374,7 @@
         },
 
         //  手指在屏幕上移动
-        _move: function(ev) {
+        _move: function (ev) {
             if (!ev.touches || ev.touches.length === 0) {
                 return;
             }
@@ -399,7 +409,7 @@
                     timeStr: getTimeStr(),
                     position: posNow
                 };
-                self.swipe(_wrapped);
+                Event.trigger("swipe", target, _wrapped);
             }
 
             if (len > 1) {
@@ -435,7 +445,7 @@
         },
 
         //  触碰取消
-        _cancel: function(ev) {
+        _cancel: function (ev) {
             clearTimeout(this.longTapTimeout);
             clearTimeout(this.tapTimeout);
             clearTimeout(this.swipeTimeout);
@@ -443,7 +453,7 @@
         },
 
         //  手指从屏幕离开
-        _end: function(ev) {
+        _end: function (ev) {
             if (!ev.changedTouches) {
                 return;
             }
@@ -456,7 +466,7 @@
             var callback, target = ev.target;
 
             if (direction !== "") {
-                self.swipeTimeout = setTimeout(function() {
+                self.swipeTimeout = setTimeout(function () {
                     _wrapped = wrapEvent(ev, {
                         el: self.el,
                         type: "swipe",
@@ -484,7 +494,7 @@
                     Event.trigger("swipeEnd", target, _wrapped);
                 }, 0);
             } else if (!self.triggedLongTap) {
-                self.tapTimeout = setTimeout(function() {
+                self.tapTimeout = setTimeout(function () {
                     if (self.isDoubleTap) {
                         _wrapped = wrapEvent(ev, {
                             el: self.el,
@@ -496,7 +506,7 @@
                         clearTimeout(self.singleTapTimeout);
                         self.isDoubleTap = false;
                     } else {
-                        self.singleTapTimeout = setTimeout(function() {
+                        self.singleTapTimeout = setTimeout(function () {
                             _wrapped = wrapEvent(ev, {
                                 el: self.el,
                                 type: "singleTap",
@@ -514,7 +524,7 @@
         },
 
         //  取消长按定时器
-        _cancelLongTap: function() {
+        _cancelLongTap: function () {
             if (typeOf(this.longTapTimeout) !== "null") {
                 clearTimeout(this.longTapTimeout);
             }
