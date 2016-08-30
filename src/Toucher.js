@@ -134,6 +134,22 @@
         return res;
     }
 
+    //  把伪数组转换成数组
+    function toArray(list) {
+        if(list && (typeof list === "object") && isFinite(list.length) && (list.length >= 0) && (list.length === Math.floor(list.length)) && list.length < 4294967296) {
+            return [].slice.call(list);
+        }
+    }
+
+    //  判断一个元素列表里面是否有多个元素
+    function isContain(collection, el) {
+        if(arguments.length === 2) {
+            return collection.some(function (elItem) {
+                return el.isEqualNode(elItem);
+            });
+        }
+    }
+
     //  构造函数
     function Toucher(selector) {
         return new Toucher.fn.init(selector);
@@ -146,7 +162,11 @@
 
         //  初始化方法
         init: function(selector) {
-            this.el = document.querySelector(selector) || document.body;
+            this.el =  selector instanceof HTMLElement ? selector :
+                        _typeOf(selector) === "string" ? document.querySelector(selector) : null;
+            if(_typeOf(this.el) === "null") {
+                throw new Error("you must specify a particular selector or a particular DOM object");
+            }
             this.scale = 1;
             this.pinchStartLen = null;
             this.isDoubleTap = false;
@@ -217,17 +237,28 @@
          * 
          */
         on: function(name, el, callback) {
+            var _type;
             if (arguments.length === 2) {
                 callback = el;
                 if (typeOf(callback) === "function") {
                     this[name] = callback;
                 }
             } else if (arguments.length === 3) {
-                //  判断是否已经是一个DOM
-                el = el instanceof HTMLElement ? el : _typeOf(el) === "string" ?  this.el.querySelector(el) : null;
-                if (el && typeof el === "object" && el.nodeType === 1 && _typeOf(el.tagName) === "string" && _typeOf(callback) === "function") {
-                    this.name = {
-                        el: el,
+                //  判断是否已经是一个DOM或者HTMLCollection对象
+                el = (el instanceof HTMLElement || el instanceof HTMLCollection) ? el : 
+                _typeOf(el) === "string" ?  this.el.querySelectorAll(el) : null;
+                _type = _typeOf(el);
+
+                if(_type === "nodelist") {
+                    this[name] = {
+                        type: "nodelist",
+                        nodelist: toArray(el),
+                        callback: callback
+                    };
+                } else {
+                    this[name] = {
+                        type: "domnode",
+                        node: el,
                         callback: callback
                     };
                 }
@@ -267,8 +298,11 @@
                 };
                 if (_typeOf(self.longTap) === "function") {
                     self.longTap(_wrapped);
-                } else if (_typeOf(self.longTap) === "object" && _typeOf(self.longTap.callback) === "function" && self.longTap.el.isEqualNode(target)) {
-                    self.longTap.callback(_wrapped);
+                } else if (_typeOf(self.longTap) === "object" && _typeOf(self.longTap.callback) === "function") {
+                    if((self.longTap.type === "node" &&  self.longTap.node.isEqualNode(target)) || (self.longTap.type === "nodelist" && isContain(self.longTap.nodelist, target))) {
+                        _wrapped.el = target;
+                        self.longTap.callback(_wrapped);
+                    }
                 }
                 self.triggedLongTap = true;
             }, self.cfg.longTapTime);
@@ -321,8 +355,11 @@
                 };
                 if (_typeOf(self.swipeStart) === "function") {
                     self.swipeStart(_wrapped);
-                } else if (_typeOf(self.swipeStart) === "object" && _typeOf(self.swipeStart.callback) === "function" && self.swipeStart.el.isEqualNode(target)) {
-                    self.swipeStart.callback(_wrapped);
+                } else if (_typeOf(self.swipeStart) === "object" && _typeOf(self.swipeStart.callback) === "function") {
+                    if((self.swipeStart.type === "node" &&  self.swipeStart.node.isEqualNode(target)) || (self.swipeStart.type === "nodelist" && isContain(self.swipeStart.nodelist, target))) {
+                        _wrapped.el = target;
+                        self.swipeStart.callback(_wrapped);
+                    }
                 }
                 self.triggedSwipeStart = true;
             } else {
@@ -352,8 +389,11 @@
                 });
                 if (_typeOf(self.pinch) === "function") {
                     self.pinch(_wrapped);
-                } else if (_typeOf(self.pinch) === "object" && _typeOf(self.pinch.callback) === "function" && self.pinch.el.isEqualNode(target)) {
-                    self.pinch.callback(_wrapped);
+                } else if (_typeOf(self.pinch) === "object" && _typeOf(self.pinch.callback) === "function") {
+                    if((self.pinch.type === "node" &&  self.pinch.node.isEqualNode(target)) || (self.pinch.type === "nodelist" && isContain(self.pinch.nodelist, target))) {
+                        _wrapped.el = target;
+                        self.pinch.callback(_wrapped);
+                    }
                 }
 
                 //  旋转
@@ -366,8 +406,11 @@
                 });
                 if (_typeOf(self.rotate) === "function") {
                     self.rotate(_wrapped);
-                } else if (_typeOf(self.rotate) === "object" && _typeOf(self.rotate.callback) === "function" && self.rotate.el.isEqualNode(target)) {
-                    self.rotate.callback(_wrapped);
+                } else if (_typeOf(self.rotate) === "object" && _typeOf(self.rotate.callback) === "function") {
+                    if((self.rotate.type === "node" &&  self.rotate.node.isEqualNode(target)) || (self.rotate.type === "nodelist" && isContain(self.rotate.nodelist, target))) {
+                        _wrapped.el = target;
+                        self.rotate.callback(_wrapped);
+                    }
                 }
 
                 ev.preventDefault();
@@ -407,8 +450,11 @@
                     });
                     if (_typeOf(self.swipe) === "function") {
                         self.swipe(_wrapped);
-                    } else if (_typeOf(self.swipe) === "object" && _typeOf(self.swipe.callback) === "function" && self.swipe.el.isEqualNode(target)) {
-                        self.swipe.callback(_wrapped);
+                    } else if (_typeOf(self.swipe) === "object" && _typeOf(self.swipe.callback) === "function") {
+                        if((self.swipe.type === "node" &&  self.swipe.node.isEqualNode(target)) || (self.swipe.type === "nodelist" && isContain(self.swipe.nodelist, target))) {
+                            _wrapped.el = target;
+                            self.swipe.callback(_wrapped);
+                        }
                     }
 
                     //  获取具体的swipeXyz方向
@@ -421,8 +467,11 @@
                     });
                     if (typeOf(callback) === "function") {
                         callback(_wrapped);
-                    } else if (_typeOf(callback) === "object" && _typeOf(callback.callback) === "function" && callback.el.isEqualNode(target)) {
-                        callback.callback(_wrapped);
+                    } else if (_typeOf(callback) === "object" && _typeOf(callback.callback) === "function") {
+                        if((callback.type === "node" &&  callback.node.isEqualNode(target)) || (callback.type === "nodelist" && isContain(callback.nodelist, target))) {
+                            _wrapped.el = target;
+                            callback.callback(_wrapped);
+                        }
                     }
 
                     _wrapped = wrapEvent(ev, {
@@ -434,7 +483,10 @@
                     if (_typeOf(self.swipeEnd) === "function") {
                         self.swipeEnd(_wrapped);
                     } else if (_typeOf(self.swipeEnd) === "object" && _typeOf(self.swipeEnd.callback) === "function" && self.swipeEnd.el.isEqualNode(target)) {
-                        self.swipeEnd.callback(_wrapped);
+                        if((self.swipeEnd.type === "node" &&  self.swipeEnd.node.isEqualNode(target)) || (self.swipeEnd.type === "nodelist" && isContain(self.swipeEnd.nodelist, target))) {
+                            _wrapped.el = target;
+                            self.swipeEnd.callback(_wrapped);
+                        }
                     }
                 }, 0);
             } else if (!self.triggedLongTap) {
@@ -448,8 +500,11 @@
                         });
                         if (_typeOf(self.doubleTap) === "function") {
                             self.doubleTap(_wrapped);
-                        } else if (_typeOf(self.doubleTap) === "object" && _typeOf(self.doubleTap.callback) === "function" && self.doubleTap.el.isEqualNode(target)) {
-                            self.doubleTap(_wrapped);
+                        } else if (_typeOf(self.doubleTap) === "object" && _typeOf(self.doubleTap.callback) === "function") {
+                            if((self.doubleTap.type === "node" &&  self.doubleTap.node.isEqualNode(target)) || (self.doubleTap.type === "nodelist" && isContain(self.doubleTap.nodelist, target))) {
+                                _wrapped.el = target;
+                                self.doubleTap.callback(_wrapped);
+                            }
                         }
                         clearTimeout(self.singleTapTimeout);
                         self.isDoubleTap = false;
@@ -463,10 +518,13 @@
                             });
                             if (_typeOf(self.singleTap) === "function") {
                                 self.singleTap(_wrapped);
-                            } else if (_typeOf(self.singleTap) === "object" && _typeOf(self.singleTap.callback) === "function" && self.doubleTap.el.isEqualNode(target)) {
-                                self.singleTap.callback(_wrapped);
+                            } else if (_typeOf(self.singleTap) === "object" && _typeOf(self.singleTap.callback) === "function") {
+                                if((self.singleTap.type === "node" &&  self.singleTap.node.isEqualNode(target)) || (self.singleTap.type === "nodelist" && isContain(self.singleTap.nodelist, target))) {
+                                    _wrapped.el = target;
+                                    self.singleTap.callback(_wrapped);
+                                }
                             }
-                        }, 200);
+                        }, 100);
                     }
                 }, 0);
             }
