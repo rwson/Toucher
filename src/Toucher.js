@@ -127,7 +127,7 @@
             touches: ev.touches,
             type: ev.type
         };
-        if (typeOf(obj) === "object") {
+        if (_typeOf(obj) === "object") {
             for (var i in obj) {
                 res[i] = obj[i];
             }
@@ -324,7 +324,12 @@
          */
 
         on: function (type, el, callback) {
-            Event.add(type, el, callback);
+            var len = arguments.length;
+            if(len === 2) {
+                Event.add(type, el);
+            } else {
+                Event.add(type, el, callback);
+            }
             return this;
         },
 
@@ -547,7 +552,7 @@
 
         //  取消长按定时器
         _cancelLongTap: function () {
-            if (typeOf(this.longTapTimeout) !== "null") {
+            if (_typeOf(this.longTapTimeout) !== "null") {
                 clearTimeout(this.longTapTimeout);
             }
         }
