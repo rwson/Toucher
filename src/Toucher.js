@@ -296,7 +296,7 @@
 
         //  提供config方法进行配置
         config: function (option) {
-            if (typeOf(option) !== "object") {
+            if (_typeOf(option) !== "object") {
                 throw new Error("method Toucher.config must pass in an anguments which is an instance of Object, but passed in " + option.toString());
             }
             for (var i in option) {
