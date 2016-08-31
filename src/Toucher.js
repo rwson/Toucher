@@ -23,7 +23,7 @@
     var _wrapped;
 
     //  获取对象上的类名
-    function typeOf(obj) {
+    function _typeOf(obj) {
         return Object.prototype.toString.call(obj).toLowerCase().slice(8, -1);
     }
 
