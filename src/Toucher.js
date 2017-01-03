@@ -49,7 +49,11 @@
     //  绑定事件
     function bindEv(el, type, fn) {
         if (el.addEventListener) {
-            el.addEventListener(type, fn, false);
+            el.addEventListener(type, fn, {
+                capture: false,
+                passive: false,
+                once: false
+            });
         } else {
             el["on" + type] = fn;
         }
