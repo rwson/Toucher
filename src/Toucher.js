@@ -402,6 +402,7 @@
             self.preTapPosition = self.startPos;
 
             ev.preventDefault();
+            ev.stopPropagation();
         },
 
         //  手指在屏幕上移动
@@ -472,6 +473,7 @@
                 ev.preventDefault();
             }
 
+            ev.stopPropagation();
             self.endPos = posNow;
         },
 
@@ -481,6 +483,7 @@
             clearTimeout(this.tapTimeout);
             clearTimeout(this.swipeTimeout);
             clearTimeout(self.singleTapTimeout);
+            ev.stopPropagation();
         },
 
         //  手指从屏幕离开
@@ -552,6 +555,7 @@
 
             this.startPos = {};
             this.endPos = {};
+            ev.stopPropagation();
         },
 
         //  取消长按定时器
