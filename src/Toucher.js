@@ -379,7 +379,8 @@
                     el: self.el,
                     type: "longTap",
                     timeStr: getTimeStr(),
-                    position: self.startPos
+                    position: self.startPos,
+                    originalEvent: ev
                 };
                 Event.trigger("longTap", target, _wrapped);
                 self.triggedLongTap = true;
@@ -401,7 +402,6 @@
             self.last = self.now;
             self.preTapPosition = self.startPos;
 
-            ev.preventDefault();
             ev.stopPropagation();
         },
 
@@ -430,7 +430,8 @@
                     el: self.el,
                     type: "swipeStart",
                     timeStr: getTimeStr(),
-                    position: posNow
+                    position: posNow,
+                    originalEvent: ev
                 };
                 Event.trigger("swipeStart", target, _wrapped);
                 self.triggedSwipeStart = true;
@@ -439,7 +440,8 @@
                     el: self.el,
                     type: "swipe",
                     timeStr: getTimeStr(),
-                    position: posNow
+                    position: posNow,
+                    originalEvent: ev
                 };
                 Event.trigger("swipe", target, _wrapped);
             }
@@ -457,7 +459,8 @@
                     type: "pinch",
                     scale: getLength(v) / this.pinchStartLen,
                     timeStr: getTimeStr(),
-                    position: posNow
+                    position: posNow,
+                    originalEvent: ev
                 });
                 Event.trigger("pinch", target, _wrapped);
 
@@ -467,14 +470,16 @@
                     type: "rotate",
                     angle: getRotateAngle(v, preV),
                     timeStr: getTimeStr(),
-                    position: posNow
+                    position: posNow,
+                    originalEvent: ev
                 });
                 Event.trigger("rotate", target, _wrapped);
                 ev.preventDefault();
             }
 
-            ev.stopPropagation();
             self.endPos = posNow;
+
+            ev.stopPropagation();
         },
 
         //  触碰取消
@@ -483,6 +488,7 @@
             clearTimeout(this.tapTimeout);
             clearTimeout(this.swipeTimeout);
             clearTimeout(self.singleTapTimeout);
+
             ev.stopPropagation();
         },
 
@@ -505,7 +511,8 @@
                         el: self.el,
                         type: "swipe",
                         timeStr: getTimeStr(),
-                        position: self.endPos
+                        position: self.endPos,
+                        originalEvent: ev
                     });
                     Event.trigger("swipe", target, _wrapped);
 
@@ -515,7 +522,8 @@
                         el: self.el,
                         type: "swipe" + direction,
                         timeStr: getTimeStr(),
-                        position: self.endPos
+                        position: self.endPos,
+                        originalEvent: ev
                     });
                     Event.trigger(("swipe" + direction), target, _wrapped);
 
@@ -523,7 +531,8 @@
                         el: self.el,
                         type: "swipeEnd",
                         timeStr: getTimeStr(),
-                        position: self.endPos
+                        position: self.endPos,
+                        originalEvent: ev
                     });
                     Event.trigger("swipeEnd", target, _wrapped);
                 }, 0);
@@ -534,7 +543,8 @@
                             el: self.el,
                             type: "doubleTap",
                             timeStr: getTimeStr(),
-                            position: self.startPos
+                            position: self.startPos,
+                            originalEvent: ev
                         });
                         Event.trigger("doubleTap", target, _wrapped);
                         clearTimeout(self.singleTapTimeout);
@@ -545,7 +555,8 @@
                                 el: self.el,
                                 type: "singleTap",
                                 timeStr: getTimeStr(),
-                                position: self.startPos
+                                position: self.startPos,
+                                originalEvent: ev
                             });
                             Event.trigger("singleTap", target, _wrapped);
                         }, 100);
@@ -555,6 +566,7 @@
 
             this.startPos = {};
             this.endPos = {};
+            
             ev.stopPropagation();
         },
 
