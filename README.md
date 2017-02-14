@@ -87,9 +87,9 @@ singleTap | 轻击(单个手指) |  Fucntion
 doubleTap | 手指放到屏幕(单个手指) |  Fucntion
 longTap | 长按 |  Fucntion
 swipe | 手指在屏幕上移动 |  Fucntion
-swipeStart | 手指在屏幕上移动(只触发一次) |  Fucntion
-swipeEnd | 下滑 |  Fucntion
-swipeUp | 左滑 |  Fucntion
+swipeStart | 滑动开始(只触发一次) |  Fucntion
+swipeEnd | 滑动结束(只触发一次) |  Fucntion
+swipeUp | 上滑 |  Fucntion
 swipeRight | 右滑 |  Fucntion
 swipeDown | 下滑 |  Fucntion
 swipeLeft | 左滑 |  Fucntion
